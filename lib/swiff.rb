@@ -7,8 +7,13 @@ class Swiff
   include HeaderInfo
   include Compression
 
-  def initialize(path)
-    @path = path
+  def initialize(path, options={})
+    input_format = options.fetch(:input, :path)
+    case input_format
+    when :bytes then @bytes = path
+    when :path  then @path = path
+    else raise ArgumentError, "Unsupported input format: #{input_format}"
+    end
     parse_header
   end
 

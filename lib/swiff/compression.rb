@@ -30,9 +30,13 @@ class Swiff
     end
 
     def read_full_size
-      buff = File.open(@path,"rb") do |f|
-        f.seek(4,IO::SEEK_CUR)
-        f.read 4
+      if @path
+        buff = File.open(@path,"rb") do |f|
+          f.seek(4,IO::SEEK_CUR)
+          f.read 4
+        end
+      else
+        buff = bytes[4, 4]
       end
       buff.unpack("L")[0]
     end

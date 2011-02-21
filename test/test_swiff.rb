@@ -65,4 +65,47 @@ class TestSwfutil < Test::Unit::TestCase
       assert_equal compressed_file, @swiff.compress
     end
   end
+
+  context 'with different input formats' do
+    should 'read a SWF from a path' do
+      swiff = Swiff.new(fixture_path('clicktag.swf'), :input => :path)
+      assert_equal true, swiff.is_swf?
+    end
+
+    should 'default to path' do
+      swiff = Swiff.new(fixture_path('clicktag.swf'))
+      assert_equal true, swiff.is_swf?
+    end
+    
+    should 'read a SWF from a byte array' do
+      bytes = File.open(fixture_path('clicktag.swf'), 'rb') { |f| f.read }
+      swiff = Swiff.new(bytes, :input => :bytes)
+      assert_equal true, swiff.is_swf?
+    end
+
+    should 'raise an error for unsupported input formats' do
+      assert_raise(ArgumentError) do
+        Swiff.new('hello', :input => :foo)
+      end
+    end
+  end
+  
+  context 'with bytes as input' do
+    setup do
+      bytes = File.open(fixture_path('clicktag.swf'), 'rb') { |f| f.read }
+      @swiff = Swiff.new(bytes, :input => :bytes)
+    end
+    
+    should 'determine width and height' do
+      assert_equal 468, @swiff.width
+      assert_equal 60, @swiff.height
+    end
+    
+    should 'determine the full size' do
+      # in the original (file-only) implementation this implementation depends
+      # on reading a couple of bytes from the start of the file, without reading
+      # the whole thing, this needs special handling if the input type is bytes
+      assert_equal 4156, @swiff.read_full_size
+    end
+  end
 end
